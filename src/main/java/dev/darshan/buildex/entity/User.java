@@ -24,7 +24,7 @@ public class User {
 
     Instant updateAt;
 
-    Instant deletedAt;
+    Instant deletedAt; // Used for soft delete, keeping the record of a user
 
 
 }
