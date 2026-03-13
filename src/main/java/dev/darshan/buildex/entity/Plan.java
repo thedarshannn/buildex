@@ -18,9 +18,9 @@ public class Plan {
 
     Integer maxTokensPerday;
 
-    Integer maxPreviews;
+    Integer maxPreviews; // Maximum number of previews allowed per plan.
 
-    Boolean unlimitedAi;
+    Boolean unlimitedAi; // Unlimited access to LLMs, ignore the maxTokensPerday if true.
 
     Boolean active;
 
