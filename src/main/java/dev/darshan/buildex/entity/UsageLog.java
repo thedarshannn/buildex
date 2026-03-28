@@ -1,6 +1,5 @@
 package dev.darshan.buildex.entity;
 
-import dev.darshan.buildex.enums.MessageRole;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -9,20 +8,21 @@ import java.time.Instant;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChatMessage {
+public class UsageLog {
 
     Long id;
 
-    ChatSession chatSession;
+    User user;
 
-    String message;
+    Project project;
 
-    MessageRole role;
+    String action;
 
-    String toolCalls;
+    Integer tokenUsed;
 
-    Integer tokensUsed;
+    Integer durationMs;
+
+    String metaData; // json of {model_used, tool_used...}
 
     Instant createdAt;
-
 }
