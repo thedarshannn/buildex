@@ -1,6 +1,7 @@
 package dev.darshan.buildex.controller;
 
 import dev.darshan.buildex.dto.auth.AuthResponse;
+import dev.darshan.buildex.dto.auth.LogInRequest;
 import dev.darshan.buildex.dto.auth.SignUpRequest;
 import dev.darshan.buildex.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,14 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @RequestMapping("/signup")
     public ResponseEntity<AuthResponse> signUp(SignUpRequest signUpRequest) {
         return ResponseEntity.ok(authService.signUp(signUpRequest));
-    };
+    }
+
+    @RequestMapping("/login")
+    public ResponseEntity<AuthResponse> logIn(LogInRequest logInRequest) {
+        return ResponseEntity.ok(authService.logIn(logInRequest));
+    }
 
 }
