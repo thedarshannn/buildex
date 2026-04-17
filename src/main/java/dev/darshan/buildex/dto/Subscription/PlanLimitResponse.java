@@ -2,8 +2,8 @@ package dev.darshan.buildex.dto.Subscription;
 
 public record PlanLimitResponse(
         String planName,
-        int maxTokensPerDay,
-        int maxProjects,
+        Integer maxTokensPerDay,
+        Integer maxProjects,
         boolean unlimitedAI
 ) {
 }

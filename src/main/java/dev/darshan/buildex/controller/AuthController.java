@@ -6,28 +6,28 @@ import dev.darshan.buildex.dto.auth.SignUpRequest;
 import dev.darshan.buildex.dto.auth.UserProfileResponse;
 import dev.darshan.buildex.service.AuthService;
 import dev.darshan.buildex.service.UserService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AuthController {
 
-    private final AuthService authService;
-    private final UserService userService;
+    AuthService authService;
+    UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signUp(SignUpRequest signUpRequest) {
+    public ResponseEntity<AuthResponse> signUp(@RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.ok(authService.signUp(signUpRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> logIn(LogInRequest logInRequest) {
+    public ResponseEntity<AuthResponse> logIn(@RequestBody LogInRequest logInRequest) {
         return ResponseEntity.ok(authService.logIn(logInRequest));
     }
 

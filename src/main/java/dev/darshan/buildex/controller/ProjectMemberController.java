@@ -41,14 +41,14 @@ public class ProjectMemberController {
     public ResponseEntity<ProjectMemberResponse> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody UpdateMemberRoleRequest   updateMemberRoleRequest
+            @RequestBody UpdateMemberRoleRequest updateMemberRoleRequest
     ){
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 memberService.updateMemberRole(projectId, updateMemberRoleRequest, memberId)
         );
     }
 
-    @PatchMapping("/{memberId}")
+    @DeleteMapping("/{memberId}")
     public ResponseEntity<ProjectMemberResponse> deleteMember(
             @PathVariable Long projectId,
             @PathVariable Long memberId
