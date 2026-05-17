@@ -1,22 +1,36 @@
 package dev.darshan.buildex.entity;
 
 import dev.darshan.buildex.enums.ProjectMemberRole;
-import lombok.AccessLevel;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-@Data
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "project_members")
 public class ProjectMember {
 
+    @EmbeddedId
     ProjectMemberId projectMemberId;
 
+    @ManyToOne
+    @MapsId("projectId")
     Project project;
 
-    User invitedBy;
+    @ManyToOne
+    @MapsId("userId")
+    User user;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     ProjectMemberRole memberRole;
 
     Instant invitedAt;
