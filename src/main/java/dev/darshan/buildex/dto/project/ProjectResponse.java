@@ -7,8 +7,8 @@ import java.time.Instant;
 public record ProjectResponse(
         Long id,
         String projectName,
-        Instant createdAt,
-        Instant updatedAt,
+        Instant createAt,
+        Instant updateAt,
         UserProfileResponse owner
 ) {
 }

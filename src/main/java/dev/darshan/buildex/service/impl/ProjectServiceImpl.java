@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing projects.
@@ -35,7 +36,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummaryResponse> getUserProjects(Long userId) {
-        return List.of();
+        return projectMapper.toProjectSummaryResponseList(projectRepository.findAllAccessibleByUser(userId));
     }
 
     /**
