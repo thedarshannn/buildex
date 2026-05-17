@@ -15,8 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing projects.
@@ -39,13 +39,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toProjectSummaryResponseList(projectRepository.findAllAccessibleByUser(userId));
     }
 
-    /**
-     * Creates a new project with the specified details for a given user.
-     *
-     * @param projectRequest the details of the project to create
-     * @param userId the ID of the user creating the project
-     * @return a {@link ProjectResponse} containing details of the created project
-     */
     @Override
     public ProjectResponse createProject(ProjectRequest projectRequest, Long userId) {
 
@@ -64,17 +57,39 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getProjectById(Long projectId, Long userId) {
-        Project project = projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
+        Project project = getAccessibleProjectById(projectId, userId);
         return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public ProjectResponse updateProject(Long projectId, ProjectRequest projectRequest, Long userId) {
-        return null;
+        Project project = getAccessibleProjectById(projectId, userId);
+
+        project.setName(projectRequest.projectName());
+        project = projectRepository.save(project);
+
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDelete(Long projectId, Long userId) {
+        Project project = getAccessibleProjectById(projectId, userId);
 
+        // If a user is not the owner, they do not have right to delete.
+        if (!project.getOwner().getId().equals(userId)){
+            throw  new RuntimeException("You are not allowed to delete!");
+        }
+
+        project.setDeletedAt(Instant.now());
+        projectRepository.save(project);
+
+    }
+
+
+
+    /// Internal Methods
+
+    private Project getAccessibleProjectById(Long projectId, Long userId){
+        return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
     }
 }
