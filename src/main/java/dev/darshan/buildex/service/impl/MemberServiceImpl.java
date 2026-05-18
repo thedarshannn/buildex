@@ -4,9 +4,13 @@ import dev.darshan.buildex.dto.member.InviteMemberRequest;
 import dev.darshan.buildex.dto.member.ProjectMemberResponse;
 import dev.darshan.buildex.dto.member.UpdateMemberRoleRequest;
 import dev.darshan.buildex.entity.Project;
+import dev.darshan.buildex.entity.ProjectMember;
+import dev.darshan.buildex.entity.ProjectMemberId;
+import dev.darshan.buildex.entity.User;
 import dev.darshan.buildex.mapper.ProjectMemberMapper;
 import dev.darshan.buildex.repository.ProjectMemberRepository;
 import dev.darshan.buildex.repository.ProjectRepository;
+import dev.darshan.buildex.repository.UserRepository;
 import dev.darshan.buildex.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -14,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +31,7 @@ public class MemberServiceImpl implements MemberService {
     ProjectRepository projectRepository;
     ProjectMemberRepository projectMemberRepository;
     ProjectMemberMapper projectMemberMapper;
+    UserRepository userRepository;
 
     @Override
     public List<ProjectMemberResponse> getAllMembers(Long projectId, Long userId) {
@@ -47,7 +53,36 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ProjectMemberResponse inviteMember(Long projectId, InviteMemberRequest inviteMemberRequest, Long userId) {
-        return null;
+
+        Project project = getAccessibleProjectById(projectId, userId);
+
+        if (!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("Not Allowed!");
+        }
+
+        User invitee = userRepository.findByEmail(inviteMemberRequest.email()).orElseThrow();
+
+        if (invitee.getId().equals(userId)){
+            throw new RuntimeException("Cannot invite yourself!");
+        }
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, invitee.getId());
+
+        if (projectMemberRepository.existsById(projectMemberId)){
+            throw new RuntimeException("Cannot invite again!");
+        }
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .projectMemberId(projectMemberId)
+                .project(project)
+                .user(invitee)
+                .memberRole(inviteMemberRequest.role())
+                .invitedAt(Instant.now())
+                .build();
+
+        projectMemberRepository.save(projectMember);
+
+        return projectMemberMapper.toProjectMemberResponseFromMember(projectMember);
     }
 
     @Override
