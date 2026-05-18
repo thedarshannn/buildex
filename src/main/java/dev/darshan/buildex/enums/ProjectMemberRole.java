@@ -5,5 +5,6 @@ import lombok.Getter;
 @Getter
 public enum ProjectMemberRole {
     EDITOR,
-    VIEWER
+    VIEWER,
+    OWNER
 }
