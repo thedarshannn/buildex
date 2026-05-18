@@ -56,19 +56,19 @@ public class MemberServiceImpl implements MemberService {
 
         Project project = getAccessibleProjectById(projectId, userId);
 
-        if (!project.getOwner().getId().equals(userId)){
+        if (!project.getOwner().getId().equals(userId)) {
             throw new RuntimeException("Not Allowed!");
         }
 
         User invitee = userRepository.findByEmail(inviteMemberRequest.email()).orElseThrow();
 
-        if (invitee.getId().equals(userId)){
+        if (invitee.getId().equals(userId)) {
             throw new RuntimeException("Cannot invite yourself!");
         }
 
         ProjectMemberId projectMemberId = new ProjectMemberId(projectId, invitee.getId());
 
-        if (projectMemberRepository.existsById(projectMemberId)){
+        if (projectMemberRepository.existsById(projectMemberId)) {
             throw new RuntimeException("Cannot invite again!");
         }
 
