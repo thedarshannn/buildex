@@ -4,6 +4,7 @@ import dev.darshan.buildex.dto.member.InviteMemberRequest;
 import dev.darshan.buildex.dto.member.ProjectMemberResponse;
 import dev.darshan.buildex.dto.member.UpdateMemberRoleRequest;
 import dev.darshan.buildex.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class ProjectMemberController {
     @PostMapping
     public ResponseEntity<ProjectMemberResponse> inviteMember(
             @PathVariable Long projectId,
-            @RequestBody InviteMemberRequest inviteMemberRequest
+            @RequestBody @Valid InviteMemberRequest inviteMemberRequest
     ){
         Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -41,7 +42,7 @@ public class ProjectMemberController {
     public ResponseEntity<ProjectMemberResponse> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody UpdateMemberRoleRequest updateMemberRoleRequest
+            @RequestBody @Valid UpdateMemberRoleRequest updateMemberRoleRequest
     ){
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 memberService.updateMemberRole(projectId, updateMemberRoleRequest, memberId)
