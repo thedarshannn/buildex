@@ -1,0 +1,470 @@
+{
+  "info": {
+    "name": "Buildex API",
+    "_postman_id": "buildex-api-collection",
+    "description": "Complete API collection for the Buildex project management platform.\n\n**Setup:**\n1. Set the `baseUrl` variable to your server URL (default: `http://localhost:8080`)\n2. Call **Sign Up** or **Log In** — the token is saved automatically to `{{token}}`\n3. All subsequent requests use `{{token}}` via the collection-level Authorization header",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Base URL of the Buildex server"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Bearer token — set automatically on login/signup"
+    },
+    {
+      "key": "projectId",
+      "value": "1",
+      "type": "string",
+      "description": "Default project ID for requests"
+    },
+    {
+      "key": "memberId",
+      "value": "1",
+      "type": "string",
+      "description": "Default member ID for member requests"
+    },
+    {
+      "key": "planId",
+      "value": "1",
+      "type": "string",
+      "description": "Default plan ID for billing requests"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User registration, login, and profile endpoints.",
+      "item": [
+        {
+          "name": "Sign Up",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Token saved:', res.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Register a new user account. Automatically saves the returned JWT to the `{{token}}` variable.\n\n**Validations:**\n- `name`: 1–30 characters\n- `email`: valid email format\n- `password`: minimum 8 characters"
+          },
+          "response": []
+        },
+        {
+          "name": "Log In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Token saved:', res.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Authenticate with email and password. Automatically saves the returned JWT to the `{{token}}` variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            },
+            "description": "Returns the profile of the currently authenticated user.\n\n**Response:** `id`, `email`, `name`, `avatarURL`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "description": "Create, read, update, and delete projects.",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects"]
+            },
+            "description": "Returns a summary list of all projects the authenticated user has access to.\n\n**Response:** Array of `{ id, projectName, createAt, updateAt }`"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}"]
+            },
+            "description": "Returns full details for a single project, including the owner's profile.\n\n**Path variables:** `projectId`"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "    pm.collectionVariables.set('projectId', res.id);",
+                  "    console.log('projectId saved:', res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectName\": \"My Awesome Project\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects"]
+            },
+            "description": "Creates a new project. The authenticated user becomes the owner. Saves the new project's `id` to `{{projectId}}`.\n\n**Validations:** `projectName` must be non-blank."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectName\": \"Updated Project Name\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}"]
+            },
+            "description": "Updates the name of an existing project.\n\n**Path variables:** `projectId`\n\n**Validations:** `projectName` must be non-blank."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}"]
+            },
+            "description": "Permanently deletes a project. Returns `204 No Content` on success.\n\n**Path variables:** `projectId`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Project Members",
+      "description": "Manage members within a project — invite, update roles, and remove.",
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "members"]
+            },
+            "description": "Returns all members of the specified project.\n\n**Response:** Array of `{ id, email, name, avatarUrl, role, invitedAt }`\n\n**Roles:** `OWNER`, `EDITOR`, `VIEWER`"
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.id) {",
+                  "    pm.collectionVariables.set('memberId', res.id);",
+                  "    console.log('memberId saved:', res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"collaborator@example.com\",\n  \"role\": \"EDITOR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "members"]
+            },
+            "description": "Invites a registered user to a project by email. Saves the new member's `id` to `{{memberId}}`.\n\n**Roles:** `OWNER`, `EDITOR`, `VIEWER`\n\n**Validations:** `email` must be a valid email; `role` is required."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Member Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"VIEWER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "members", "{{memberId}}"]
+            },
+            "description": "Updates the role of an existing project member.\n\n**Path variables:** `projectId`, `memberId`\n\n**Roles:** `OWNER`, `EDITOR`, `VIEWER`"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "members", "{{memberId}}"]
+            },
+            "description": "Removes a member from a project. Returns `204 No Content` on success.\n\n**Path variables:** `projectId`, `memberId`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "description": "Browse and read project files.",
+      "item": [
+        {
+          "name": "List File Tree",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "files"]
+            },
+            "description": "Returns the full file tree for a project.\n\n**Response:** Array of `{ path, modifiedAt, size, type }` where `type` is `\"file\"` or `\"directory\"`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get File Content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}/files/src/main/App.java",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "projects", "{{projectId}}", "files", "src", "main", "App.java"]
+            },
+            "description": "Returns the content of a specific file. The path segment after `/files/` is a wildcard — replace the example path with the actual file path.\n\n**Response:** `{ path, content }`"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "description": "Subscription plans, Stripe checkout, and customer portal.",
+      "item": [
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "plans"]
+            },
+            "description": "Returns all available subscription plans.\n\n**Response:** Array of `{ id, name, stripePriceId, maxProjects, maxTokensPerday, maxPreviews, unlimitedAi, active }`"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/me/subscription",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "me", "subscription"]
+            },
+            "description": "Returns the current user's active subscription details.\n\n**Response:** `{ plan, status, nextBillingDate, tokenUsedThisCycle }`"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": {{planId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/stripe/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "stripe", "checkout"]
+            },
+            "description": "Initiates a Stripe checkout session for the given plan.\n\n**Response:** `{ checkoutURL }` — redirect the user to this URL to complete payment."
+          },
+          "response": []
+        },
+        {
+          "name": "Open Customer Portal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/stripe/portal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "stripe", "portal"]
+            },
+            "description": "Creates a Stripe billing portal session for the authenticated user.\n\n**Response:** `{ portalURL }` — redirect the user to this URL to manage their subscription."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usage",
+      "description": "Token and preview usage metrics for the current user.",
+      "item": [
+        {
+          "name": "Get Today's Usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usage/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usage", "today"]
+            },
+            "description": "Returns token and preview usage for the current day.\n\n**Response:** `{ tokensUsed, tokenLimit, previewsRunning, previewsLimit }`"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Plan Limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/usage/limits",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "usage", "limits"]
+            },
+            "description": "Returns the limits imposed by the user's current plan.\n\n**Response:** `{ planName, maxTokensPerDay, maxProjects, unlimitedAI }`"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
