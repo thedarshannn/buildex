@@ -26,8 +26,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse signUp(SignUpRequest signUpRequest) {
 
-        userRepository.findByUsername(signUpRequest.name()).ifPresent(user -> {
-        });
 
         return null;
     }

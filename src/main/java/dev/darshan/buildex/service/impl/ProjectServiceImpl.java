@@ -5,6 +5,7 @@ import dev.darshan.buildex.dto.project.ProjectResponse;
 import dev.darshan.buildex.dto.project.ProjectSummaryResponse;
 import dev.darshan.buildex.entity.Project;
 import dev.darshan.buildex.entity.User;
+import dev.darshan.buildex.error.exceptions.ResourceNotFoundException;
 import dev.darshan.buildex.mapper.ProjectMapper;
 import dev.darshan.buildex.repository.ProjectRepository;
 import dev.darshan.buildex.repository.UserRepository;
@@ -90,6 +91,7 @@ public class ProjectServiceImpl implements ProjectService {
     /// Internal Methods
 
     private Project getAccessibleProjectById(Long projectId, Long userId){
-        return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
+        return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow(()->
+                new ResourceNotFoundException("Project", projectId.toString()));
     }
 }

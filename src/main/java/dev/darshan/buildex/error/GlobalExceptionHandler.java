@@ -4,10 +4,9 @@ package dev.darshan.buildex.error;
 import dev.darshan.buildex.error.exceptions.BadRequestException;
 import dev.darshan.buildex.error.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +25,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException e){
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, e.getResourceName()+" with Id "+ e.getResourceId()+" not found!" );
         log.error(apiError.toString(), e);
+        return ResponseEntity.status(apiError.status()).body(apiError);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleInputValidationError(MethodArgumentNotValidException e){
+
+        var errors = e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> new ApiFieldError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .toList();
+
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, e.getLocalizedMessage(), errors);
+        log.error(apiError.toString(), e.getLocalizedMessage());
         return ResponseEntity.status(apiError.status()).body(apiError);
     }
 
