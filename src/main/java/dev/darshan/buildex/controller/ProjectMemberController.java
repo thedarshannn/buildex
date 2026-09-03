@@ -44,8 +44,9 @@ public class ProjectMemberController {
             @PathVariable Long memberId,
             @RequestBody @Valid UpdateMemberRoleRequest updateMemberRoleRequest
     ){
+        Long userId = 1L;
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                memberService.updateMemberRole(projectId, updateMemberRoleRequest, memberId)
+                memberService.updateMemberRole(projectId, memberId, updateMemberRoleRequest, userId)
         );
     }
 

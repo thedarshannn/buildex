@@ -2,6 +2,7 @@ package dev.darshan.buildex.error;
 
 
 import dev.darshan.buildex.error.exceptions.BadRequestException;
+import dev.darshan.buildex.error.exceptions.ForbiddenException;
 import dev.darshan.buildex.error.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException e){
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, e.getResourceName()+" with Id "+ e.getResourceId()+" not found!" );
+        log.error(apiError.toString(), e);
+        return ResponseEntity.status(apiError.status()).body(apiError);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiError> handleForbidden(ForbiddenException e){
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, e.getMessage());
         log.error(apiError.toString(), e);
         return ResponseEntity.status(apiError.status()).body(apiError);
     }
