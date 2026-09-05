@@ -7,6 +7,9 @@ import dev.darshan.buildex.entity.Project;
 import dev.darshan.buildex.entity.ProjectMember;
 import dev.darshan.buildex.entity.ProjectMemberId;
 import dev.darshan.buildex.entity.User;
+import dev.darshan.buildex.enums.ProjectMemberRole;
+import dev.darshan.buildex.error.exceptions.ForbiddenException;
+import dev.darshan.buildex.error.exceptions.ResourceNotFoundException;
 import dev.darshan.buildex.mapper.ProjectMemberMapper;
 import dev.darshan.buildex.repository.ProjectMemberRepository;
 import dev.darshan.buildex.repository.ProjectRepository;
@@ -19,7 +22,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,19 +38,13 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<ProjectMemberResponse> getAllMembers(Long projectId, Long userId) {
 
-        Project project = getAccessibleProjectById(projectId, userId);
-        List<ProjectMemberResponse> memberResponse = new ArrayList<>();
+        getAccessibleProjectById(projectId, userId);
 
-        memberResponse.add(projectMemberMapper.toProjectMemberResponse(project.getOwner()));
+        return projectMemberRepository.findByProjectId(projectId)
+                .stream()
+                .map(projectMemberMapper::toProjectMemberResponseFromMember)
+                .toList();
 
-        memberResponse.addAll(
-                projectMemberRepository.findByProjectId(projectId)
-                        .stream()
-                        .map(projectMemberMapper::toProjectMemberResponseFromMember)
-                        .toList()
-        );
-
-        return memberResponse;
     }
 
     @Override
@@ -56,9 +52,7 @@ public class MemberServiceImpl implements MemberService {
 
         Project project = getAccessibleProjectById(projectId, userId);
 
-        if (!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Not Allowed!");
-        }
+        requireOwner(projectId, userId);
 
         User invitee = userRepository.findByEmail(inviteMemberRequest.email()).orElseThrow();
 
@@ -86,13 +80,42 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ProjectMemberResponse updateMemberRole(Long projectId, UpdateMemberRoleRequest updateMemberRoleRequest, Long memberId) {
-        return null;
+    public ProjectMemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest updateMemberRoleRequest, Long userId) {
+
+        getAccessibleProjectById(projectId, userId);
+
+        requireOwner(projectId, userId);
+
+        if (memberId.equals(userId)) {
+            throw new ForbiddenException("The owner cannot change their own role");
+        }
+
+        ProjectMember memberToUpdate = getProjectMember(projectId, memberId);
+        memberToUpdate.setMemberRole(updateMemberRoleRequest.role());
+
+        projectMemberRepository.save(memberToUpdate);
+
+        return projectMemberMapper.toProjectMemberResponseFromMember(memberToUpdate);
     }
 
     @Override
-    public ProjectMemberResponse deleteProjectMember(Long projectId, Long memberId, Long userId) {
-        return null;
+    public void removeProjectMember(Long projectId, Long memberId, Long userId) {
+
+        getAccessibleProjectById(projectId, userId);
+
+        requireOwner(projectId, userId);
+
+        if (memberId.equals(userId)) {
+            throw new ForbiddenException("The owner cannot be removed from the project");
+        }
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
+
+        if (!projectMemberRepository.existsById(projectMemberId)) {
+            throw new RuntimeException("User is not in the project members");
+        }
+
+        projectMemberRepository.deleteById(projectMemberId);
     }
 
 
@@ -100,5 +123,22 @@ public class MemberServiceImpl implements MemberService {
 
     private Project getAccessibleProjectById(Long projectId, Long userId) {
         return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
+    }
+
+    private ProjectMember getProjectMember(Long projectId, Long userId) {
+        return projectMemberRepository.findById(new ProjectMemberId(projectId, userId))
+                .orElseThrow(() -> new ResourceNotFoundException("Project member", userId.toString()));
+    }
+
+    /**
+     * Ownership now lives on {@link ProjectMember} instead of {@link Project},
+     * so member management is gated on the caller holding the OWNER role.
+     */
+    private void requireOwner(Long projectId, Long userId) {
+        ProjectMember caller = getProjectMember(projectId, userId);
+
+        if (caller.getMemberRole() != ProjectMemberRole.OWNER) {
+            throw new ForbiddenException("Only the project owner can manage members");
+        }
     }
 }

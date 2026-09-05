@@ -1,6 +1,8 @@
 package dev.darshan.buildex.dto.project;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record ProjectRequest(
-        String projectName
+        @NotBlank String projectName
 ) {
 }

@@ -1,8 +1,9 @@
 package dev.darshan.buildex.dto.member;
 
 import dev.darshan.buildex.enums.ProjectMemberRole;
+import jakarta.validation.constraints.NotNull;
 
 public record UpdateMemberRoleRequest(
-        ProjectMemberRole role
+        @NotNull ProjectMemberRole role
 ) {
 }
